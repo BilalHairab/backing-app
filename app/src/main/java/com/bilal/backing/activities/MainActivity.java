@@ -7,6 +7,7 @@ import android.util.Log;
 import android.widget.GridView;
 
 import com.bilal.backing.R;
+import com.bilal.backing.adapters.RecipesAdapter;
 import com.bilal.backing.interfaces.RecipesService;
 import com.bilal.backing.models.Recipe;
 
@@ -41,6 +42,9 @@ public class MainActivity extends AppCompatActivity {
             public void onResponse(@NonNull Call<List<Recipe>> call, @NonNull Response<List<Recipe>> response) {
                 List<Recipe> downloadedRecipes = response.body();
                 Log.e("bilal_recipes", downloadedRecipes.size() + "");
+                RecipesAdapter adapter = new RecipesAdapter(MainActivity.this, downloadedRecipes);
+                gridView.setAdapter(adapter);
+                Log.e("bilal_columns", gridView.getNumColumns() + "");
             }
 
             @Override
