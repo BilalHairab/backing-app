@@ -1,12 +1,16 @@
 package com.bilal.backing.activities;
 
+import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.GridView;
 
 import com.bilal.backing.R;
+import com.bilal.backing.Utils;
 import com.bilal.backing.adapters.RecipesAdapter;
 import com.bilal.backing.interfaces.RecipesService;
 import com.bilal.backing.models.Recipe;
@@ -26,6 +30,8 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.gv_recipes)
     GridView gridView;
 
+    List<Recipe> recipes;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -36,23 +42,27 @@ public class MainActivity extends AppCompatActivity {
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
         RecipesService service = retrofit.create(RecipesService.class);
-        Call<List<Recipe>> recipes = service.listRecipes();
-        recipes.enqueue(new Callback<List<Recipe>>() {
+        Call<List<Recipe>> recipesCall = service.listRecipes();
+        recipesCall.enqueue(new Callback<List<Recipe>>() {
             @Override
             public void onResponse(@NonNull Call<List<Recipe>> call, @NonNull Response<List<Recipe>> response) {
-                List<Recipe> downloadedRecipes = response.body();
-                Log.e("bilal_recipes", downloadedRecipes.size() + "");
-                RecipesAdapter adapter = new RecipesAdapter(MainActivity.this, downloadedRecipes);
+                recipes = response.body();
+                RecipesAdapter adapter = new RecipesAdapter(MainActivity.this, recipes);
                 gridView.setAdapter(adapter);
-                Log.e("bilal_columns", gridView.getNumColumns() + "");
+                gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                        Intent x = new Intent(MainActivity.this, RecipeDetailActivity.class);
+                        x.putExtra(Utils.RECIPE, recipes.get(position));
+                        startActivity(x);
+                    }
+                });
             }
 
             @Override
             public void onFailure(@NonNull Call<List<Recipe>> call, @NonNull Throwable t) {
                 Log.e("bilal_recipes", t.getMessage());
-
             }
         });
-//        Log.e("bilal_columns", gridView.getNumColumns() + "");
     }
 }

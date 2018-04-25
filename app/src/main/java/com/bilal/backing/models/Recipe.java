@@ -1,9 +1,12 @@
 package com.bilal.backing.models;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import java.util.ArrayList;
 import java.util.List;
 
-public class Recipe {
+public class Recipe implements Parcelable {
 
     private int id;
     private String name;
@@ -12,8 +15,17 @@ public class Recipe {
     private int servings;
     private String image;
 
-    public Recipe(){
+    public Recipe() {
 
+    }
+
+    public Recipe(Parcel in) {
+        id = in.readInt();
+        name = in.readString();
+        in.readList(ingredients, Ingredient.class.getClassLoader());
+        in.readList(steps, Step.class.getClassLoader());
+        servings = in.readInt();
+        image = in.readString();
     }
 
     public Recipe(int id, String name, List<Ingredient> ingredients, List<Step> steps, int servings, String image) {
@@ -72,4 +84,31 @@ public class Recipe {
     public void setImage(String image) {
         this.image = image;
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(id);
+        dest.writeString(name);
+        dest.writeList(ingredients);
+        dest.writeList(steps);
+        dest.writeInt(servings);
+        dest.writeString(image);
+    }
+
+    public static final Parcelable.Creator<Recipe> CREATOR
+            = new Parcelable.Creator<Recipe>() {
+        public Recipe createFromParcel(Parcel in) {
+            return new Recipe(in);
+        }
+
+        public Recipe[] newArray(int size) {
+            return new Recipe[size];
+        }
+    };
+
 }

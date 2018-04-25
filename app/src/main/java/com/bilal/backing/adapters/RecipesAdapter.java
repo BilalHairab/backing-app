@@ -42,11 +42,10 @@ public class RecipesAdapter extends BaseAdapter {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        LayoutInflater inflater = (LayoutInflater) context
-                .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        LayoutInflater inflater = LayoutInflater.from(context);
         View item;
         if (convertView == null) {
-            item = inflater.inflate(R.layout.item_recipe, null);
+            item = inflater.inflate(R.layout.item_recipe, parent, false);
             TextView name = item.findViewById(R.id.tv_name);
             TextView served = item.findViewById(R.id.tv_served);
             name.setText(mRecipes.get(position).getName());
