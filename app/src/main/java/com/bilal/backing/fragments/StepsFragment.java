@@ -108,9 +108,11 @@ public class StepsFragment extends Fragment implements OnStepSelected {
             onStepChanged.onChangeStep(position);
         } else {
             Intent intent = new Intent(context, StepDetailActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
             intent.putExtra(ARG_RECIPE, mRecipe);
             intent.putExtra(Utils.STEP_SEQUENCE, position);
             context.startActivity(intent);
+            getActivity().finish();
         }
     }
 }

@@ -3,12 +3,14 @@ package com.bilal.backing.activities;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.MenuItem;
 
 import com.bilal.backing.R;
 import com.bilal.backing.Utils;
 import com.bilal.backing.fragments.StepDetailFragment;
 import com.bilal.backing.interfaces.OnStepChanged;
 import com.bilal.backing.models.Recipe;
+import com.bilal.backing.models.Step;
 
 public class StepDetailActivity extends AppCompatActivity implements OnStepChanged {
     Recipe mRecipe;
@@ -41,9 +43,24 @@ public class StepDetailActivity extends AppCompatActivity implements OnStepChang
     }
 
     void changeStep(int toStep) {
+        Step to = mRecipe.getSteps().get(toStep);
+        setTitle(to.getShortDescription());
         fragmentManager.beginTransaction().replace(R.id.fr_step_detail,
-                StepDetailFragment.newInstance(mRecipe.getSteps().get(toStep),
+                StepDetailFragment.newInstance(to,
                         toStep + 1 == mRecipe.getSteps().size(), this)).commit();
     }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                if (lastPosition == 0) {
+                    onBackPressed();
+                } else {
+                    lastPosition--;
+                    changeStep(lastPosition);
+                }
+        }
+        return true;
+    }
 }
