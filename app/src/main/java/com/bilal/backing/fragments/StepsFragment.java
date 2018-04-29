@@ -3,6 +3,7 @@ package com.bilal.backing.fragments;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -34,7 +35,7 @@ import butterknife.ButterKnife;
 public class StepsFragment extends Fragment implements OnStepSelected {
     private static final String ARG_RECIPE = "recipe";
     private static final String ARG_TABLET = "tablet";
-    private static final String ARG_STEP_CHANGED = "changed";
+    //    private static final String ARG_STEP_CHANGED = "changed";
     @BindView(R.id.elv_ingredients)
     ExpandableListView listViewIngredients;
 
@@ -45,7 +46,8 @@ public class StepsFragment extends Fragment implements OnStepSelected {
     boolean isTablet;
     OnStepChanged onStepChanged;
     HashMap<String, List<Ingredient>> ingredientsMap = new HashMap<>();
-
+    static final String STEPS_STATE = "steps_state";
+    Parcelable stepsState;
     List<String> header = new ArrayList<>();
     LinearLayoutManager linearLayoutManager;
     Context context;
@@ -54,24 +56,13 @@ public class StepsFragment extends Fragment implements OnStepSelected {
 
     }
 
-    public static StepsFragment newInstance(Recipe recipe, boolean isTablet, OnStepChanged onStepChanged) {
+    public static StepsFragment newInstance(Recipe recipe, boolean isTablet) {
         StepsFragment fragment = new StepsFragment();
         Bundle args = new Bundle();
         args.putParcelable(ARG_RECIPE, recipe);
         args.putBoolean(ARG_TABLET, isTablet);
-        args.putSerializable(ARG_STEP_CHANGED, onStepChanged);
         fragment.setArguments(args);
         return fragment;
-    }
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mRecipe = getArguments().getParcelable(ARG_RECIPE);
-            isTablet = getArguments().getBoolean(ARG_TABLET);
-            onStepChanged = (OnStepChanged) getArguments().getSerializable(ARG_STEP_CHANGED);
-        }
     }
 
     @Override
@@ -83,24 +74,22 @@ public class StepsFragment extends Fragment implements OnStepSelected {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         context = view.getContext();
+        linearLayoutManager = new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false);
+        if (savedInstanceState != null && savedInstanceState.containsKey(ARG_RECIPE)) {
+            mRecipe = savedInstanceState.getParcelable(ARG_RECIPE);
+            isTablet = savedInstanceState.getBoolean(ARG_TABLET);
+            linearLayoutManager.onRestoreInstanceState(savedInstanceState.getParcelable(STEPS_STATE));
+        } else if (getArguments() != null) {
+            mRecipe = getArguments().getParcelable(ARG_RECIPE);
+            isTablet = getArguments().getBoolean(ARG_TABLET);
+        }
         ButterKnife.bind(this, view);
-        recyclerView = view.findViewById(R.id.rv_steps);
-        recyclerView.setHasFixedSize(true);
         if (mRecipe != null) {
-            header.add("Ingredients");
-            ingredientsMap.put(header.get(0), mRecipe.getIngredients());
-            IngredientsAdapter adapter = new IngredientsAdapter(context, header, ingredientsMap);
-            listViewIngredients.setAdapter(adapter);
-            linearLayoutManager = new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false);
-            MyRecyclerItemDecoration itemDecoration = new MyRecyclerItemDecoration(9, 4);
-            recyclerView.addItemDecoration(itemDecoration);
-            recyclerView.setHasFixedSize(true);
-            recyclerView.setLayoutManager(linearLayoutManager);
-            StepsAdapter stepsAdapter = new StepsAdapter(mRecipe.getSteps(), this);
-            recyclerView.setAdapter(stepsAdapter);
+            adapt();
         }
         super.onViewCreated(view, savedInstanceState);
     }
+
 
     @Override
     public void showStepInfo(int position) {
@@ -108,11 +97,47 @@ public class StepsFragment extends Fragment implements OnStepSelected {
             onStepChanged.onChangeStep(position);
         } else {
             Intent intent = new Intent(context, StepDetailActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
             intent.putExtra(ARG_RECIPE, mRecipe);
             intent.putExtra(Utils.STEP_SEQUENCE, position);
             context.startActivity(intent);
-            getActivity().finish();
         }
     }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        try {
+            onStepChanged = (OnStepChanged) context;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(context.toString()
+                    + " must implement MyInterface ");
+        }
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        if (linearLayoutManager != null)
+            outState.putParcelable(STEPS_STATE, linearLayoutManager.onSaveInstanceState());
+        outState.putParcelable(ARG_RECIPE, mRecipe);
+        outState.putBoolean(ARG_TABLET, isTablet);
+        super.onSaveInstanceState(outState);
+    }
+
+    void adapt() {
+        header.clear();
+        ingredientsMap.clear();
+        header.add("Ingredients");
+        ingredientsMap.put(header.get(0), mRecipe.getIngredients());
+        IngredientsAdapter adapter = new IngredientsAdapter(context, header, ingredientsMap);
+        listViewIngredients.setAdapter(adapter);
+        MyRecyclerItemDecoration itemDecoration = new MyRecyclerItemDecoration(9, 4);
+        recyclerView.addItemDecoration(itemDecoration);
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setLayoutManager(linearLayoutManager);
+        StepsAdapter stepsAdapter = new StepsAdapter(mRecipe.getSteps(), this);
+        recyclerView.setAdapter(stepsAdapter);
+        if (stepsState != null)
+            linearLayoutManager.onRestoreInstanceState(stepsState);
+    }
+
 }

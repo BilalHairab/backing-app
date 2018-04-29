@@ -1,5 +1,8 @@
 package com.bilal.backing.fragments;
 
+import android.annotation.SuppressLint;
+import android.content.Context;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -13,6 +16,16 @@ import android.widget.TextView;
 import com.bilal.backing.R;
 import com.bilal.backing.interfaces.OnStepChanged;
 import com.bilal.backing.models.Step;
+import com.google.android.exoplayer2.DefaultLoadControl;
+import com.google.android.exoplayer2.DefaultRenderersFactory;
+import com.google.android.exoplayer2.ExoPlayerFactory;
+import com.google.android.exoplayer2.SimpleExoPlayer;
+import com.google.android.exoplayer2.source.ExtractorMediaSource;
+import com.google.android.exoplayer2.source.MediaSource;
+import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
+import com.google.android.exoplayer2.ui.SimpleExoPlayerView;
+import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory;
+import com.google.android.exoplayer2.util.Util;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -20,27 +33,36 @@ import butterknife.ButterKnife;
 public class StepDetailFragment extends Fragment {
     private static final String ARG_STEP = "step";
     private static final String ARG_LAST_STEP = "last";
-    private static final String ARG_STEP_CHANGED = "changed";
+    //    private static final String ARG_STEP_CHANGED = "changed";
+    private static final String ARG_CURRENT_POSITION = "position";
+
     private OnStepChanged onStepChanged;
-    @BindView(R.id.textView)
-    TextView textView;
-
-    @BindView(R.id.button)
-    Button button;
-
+    SimpleExoPlayer player;
     private Step step;
     private boolean isLastStep;
+    Context context;
+    long playbackPosition = 0;
+    int currentWindow = 0;
+    boolean playWhenReady = true;
+
+    @BindView(R.id.tv_step_description)
+    TextView tvDescription;
+
+    @BindView(R.id.btn_next)
+    Button button;
+
+    @BindView(R.id.exo_video)
+    SimpleExoPlayerView playerView;
 
     public StepDetailFragment() {
 
     }
 
-    public static StepDetailFragment newInstance(Step step, boolean isLastStep, OnStepChanged onStepChanged) {
+    public static StepDetailFragment newInstance(Step step, boolean isLastStep) {
         StepDetailFragment fragment = new StepDetailFragment();
         Bundle args = new Bundle();
         args.putParcelable(ARG_STEP, step);
         args.putBoolean(ARG_LAST_STEP, isLastStep);
-        args.putSerializable(ARG_STEP_CHANGED, onStepChanged);
         fragment.setArguments(args);
         return fragment;
     }
@@ -48,10 +70,13 @@ public class StepDetailFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
+        if (savedInstanceState != null && savedInstanceState.containsKey(ARG_STEP)) {
+            step = savedInstanceState.getParcelable(ARG_STEP);
+            playbackPosition = savedInstanceState.getLong(ARG_CURRENT_POSITION);
+            isLastStep = savedInstanceState.getBoolean(ARG_LAST_STEP);
+        } else if (getArguments() != null) {
             step = getArguments().getParcelable(ARG_STEP);
             isLastStep = getArguments().getBoolean(ARG_LAST_STEP);
-            onStepChanged = (OnStepChanged) getArguments().getSerializable(ARG_STEP_CHANGED);
         }
     }
 
@@ -64,7 +89,38 @@ public class StepDetailFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         ButterKnife.bind(this, view);
-        button.setText(step.getShortDescription());
+        context = view.getContext();
+        super.onViewCreated(view, savedInstanceState);
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        try {
+            onStepChanged = (OnStepChanged) context;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(context.toString()
+                    + " must implement MyInterface ");
+        }
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if (step != null) {
+            outState.putParcelable(ARG_STEP, step);
+            outState.putBoolean(ARG_LAST_STEP, isLastStep);
+            if (player != null)
+                outState.putLong(ARG_CURRENT_POSITION, player.getCurrentPosition());
+        }
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        if (Util.SDK_INT > 23) {
+            initializePlayer();
+        }
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -73,6 +129,71 @@ public class StepDetailFragment extends Fragment {
         });
         if (isLastStep)
             button.setVisibility(View.GONE);
-        super.onViewCreated(view, savedInstanceState);
+        tvDescription.setText(step.getDescription());
+
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        hideSystemUi();
+        if ((Util.SDK_INT <= 23 || player == null)) {
+            initializePlayer();
+        }
+    }
+
+    private void initializePlayer() {
+        player = ExoPlayerFactory.newSimpleInstance(
+                new DefaultRenderersFactory(context),
+                new DefaultTrackSelector(), new DefaultLoadControl());
+
+        playerView.setPlayer(player);
+        player.setPlayWhenReady(playWhenReady);
+        player.seekTo(currentWindow, playbackPosition);
+        Uri uri = Uri.parse(step.getVideoURL());
+        MediaSource mediaSource = buildMediaSource(uri);
+        player.prepare(mediaSource, true, false);
+    }
+
+    private MediaSource buildMediaSource(Uri uri) {
+        return new ExtractorMediaSource.Factory(
+                new DefaultHttpDataSourceFactory("exoplayer-codelab")).
+                createMediaSource(uri);
+    }
+
+    private void releasePlayer() {
+        if (player != null) {
+            playbackPosition = player.getCurrentPosition();
+            currentWindow = player.getCurrentWindowIndex();
+            playWhenReady = player.getPlayWhenReady();
+            player.release();
+            player = null;
+        }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (Util.SDK_INT <= 23) {
+            releasePlayer();
+        }
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (Util.SDK_INT > 23) {
+            releasePlayer();
+        }
+    }
+
+    @SuppressLint("InlinedApi")
+    private void hideSystemUi() {
+        playerView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE
+                | View.SYSTEM_UI_FLAG_FULLSCREEN
+                | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+//                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
     }
 }

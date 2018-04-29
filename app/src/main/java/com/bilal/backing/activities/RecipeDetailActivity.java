@@ -17,22 +17,32 @@ public class RecipeDetailActivity extends AppCompatActivity implements OnStepCha
     boolean deviceIsTablet = false;
     FragmentManager fragmentManager;
     int lastPosition = -1;
+    OnStepChanged onStepChanged;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_recipe_detail);
         fragmentManager = getSupportFragmentManager();
-
+        onStepChanged = RecipeDetailActivity.this;
         if (findViewById(R.id.fr_step_detail) != null)
             deviceIsTablet = true;
-        if (getIntent().hasExtra(Utils.RECIPE)) {
-            mRecipe = (Recipe) getIntent().getExtras().get(Utils.RECIPE);
+
+        if (savedInstanceState != null && savedInstanceState.containsKey(Utils.RECIPE)) {
+            Log.e("bilal_onCreate", "saved");
+            mRecipe = savedInstanceState.getParcelable(Utils.RECIPE);
             setTitle(mRecipe.getName());
-            Log.e("bilal_step", "received ");
-            fragmentManager.beginTransaction().replace(R.id.fr_recipe_detail, StepsFragment.newInstance(mRecipe,
-                    deviceIsTablet, this)).commit();
+        } else if (getIntent().hasExtra(Utils.RECIPE)) {
+            Log.e("bilal_onCreate", "intent");
+            mRecipe = configureRecipeData(getIntent().getExtras());
         }
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        if (mRecipe != null)
+            outState.putParcelable(Utils.RECIPE, mRecipe);
+        super.onSaveInstanceState(outState);
     }
 
     @Override
@@ -54,6 +64,14 @@ public class RecipeDetailActivity extends AppCompatActivity implements OnStepCha
     void changeStep(int toStep) {
         fragmentManager.beginTransaction().replace(R.id.fr_step_detail,
                 StepDetailFragment.newInstance(mRecipe.getSteps().get(toStep),
-                        toStep + 1 == mRecipe.getSteps().size(), this)).commit();
+                        toStep + 1 == mRecipe.getSteps().size())).commit();
+    }
+
+    Recipe configureRecipeData(Bundle bundle) {
+        Recipe recipe = bundle.getParcelable(Utils.RECIPE);
+        setTitle(recipe.getName());
+        fragmentManager.beginTransaction().replace(R.id.fr_recipe_detail, StepsFragment.newInstance(recipe,
+                deviceIsTablet)).commit();
+        return recipe;
     }
 }

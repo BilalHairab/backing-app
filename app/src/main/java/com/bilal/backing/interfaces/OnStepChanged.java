@@ -1,8 +1,7 @@
 package com.bilal.backing.interfaces;
 
-import java.io.Serializable;
-
-public interface OnStepChanged extends Serializable{
+public interface OnStepChanged {
     void onNextStep();
+
     void onChangeStep(int position);
 }

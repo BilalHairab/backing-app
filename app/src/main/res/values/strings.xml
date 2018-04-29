@@ -2,5 +2,6 @@
     <string name="app_name">Backing Assistant</string>
     <string name="label_served">Can be served to: </string>
     <string name="label_ingredients">Required Ingredients</string>
+    <string name="button_next">Next Step</string>
 
 </resources>
