@@ -9,5 +9,9 @@
         android:id="@+id/gv_recipes"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:numColumns="@integer/columns_recipes"/>
+        android:layout_margin="8dp"
+        android:layout_marginEnd="8dp"
+        android:horizontalSpacing="10dp"
+        android:numColumns="@integer/columns_recipes"
+        android:verticalSpacing="10dp" />
 </RelativeLayout>

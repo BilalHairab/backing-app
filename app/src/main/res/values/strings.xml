@@ -3,5 +3,7 @@
     <string name="label_served">Can be served to: </string>
     <string name="label_ingredients">Required Ingredients</string>
     <string name="button_next">Next Step</string>
+    <string name="desc_recipe_item">Recipe Image</string>
+    <string name="desc_served_people">people icon</string>
 
 </resources>

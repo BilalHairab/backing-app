@@ -19,7 +19,6 @@ public class RecipeDetailActivity extends AppCompatActivity implements OnStepCha
     boolean deviceIsTablet = false;
     FragmentManager fragmentManager;
     int lastPosition = -1;
-    final String RECIPE_FRAGMENT_TAG = "recipes";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,6 +49,20 @@ public class RecipeDetailActivity extends AppCompatActivity implements OnStepCha
 //    }
 
     @Override
+    public void onBackPressed() {
+        int fragments = getSupportFragmentManager().getBackStackEntryCount();
+        if (fragments == 2 || fragments == 1) {
+            finish();
+        } else {
+            if (getFragmentManager().getBackStackEntryCount() > 1) {
+                getFragmentManager().popBackStack();
+            } else {
+                super.onBackPressed();
+            }
+        }
+    }
+
+    @Override
     public void onNextStep() {
         if (mRecipe != null && deviceIsTablet) {
             lastPosition++;
@@ -75,20 +88,23 @@ public class RecipeDetailActivity extends AppCompatActivity implements OnStepCha
     void changeStep(int toStep) {
         Step step = mRecipe.getSteps().get(toStep);
         setTitle(step.getShortDescription());
-        fragmentManager.beginTransaction().replace(R.id.fr_step_detail,
-                StepDetailFragment.newInstance(mRecipe.getSteps().get(toStep),
-                        toStep + 1 == mRecipe.getSteps().size())).commit();
+        Fragment fragment = fragmentManager.findFragmentByTag(Utils.STEP_FRAGMENT_TAG);
+        if (fragment != null) {
+            fragmentManager.popBackStackImmediate(Utils.STEP_FRAGMENT_TAG, 0);
+            return;
+        }
+        fragment = StepDetailFragment.newInstance(mRecipe.getSteps().get(toStep), toStep + 1 == mRecipe.getSteps().size());
+        fragmentManager.beginTransaction().replace(R.id.fr_step_detail, fragment).commit();
     }
 
     void configureRecipeData() {
         setTitle(mRecipe.getName());
-        Fragment fragment = fragmentManager.findFragmentByTag(RECIPE_FRAGMENT_TAG);
-//        if (fragment != null) {
-//            fragmentManager.popBackStackImmediate(RECIPE_FRAGMENT_TAG, 0);
-//            return;
-//        }
+        Fragment fragment = fragmentManager.findFragmentByTag(Utils.RECIPES);
+        if (fragment != null) {
+            fragmentManager.popBackStackImmediate(Utils.RECIPES, 0);
+            return;
+        }
         fragment = StepsFragment.newInstance(mRecipe, deviceIsTablet);
-        fragmentManager.beginTransaction().replace(R.id.fr_recipe_detail, fragment).addToBackStack(RECIPE_FRAGMENT_TAG).commit();
-        return;
+        fragmentManager.beginTransaction().replace(R.id.fr_recipe_detail, fragment).addToBackStack(Utils.RECIPES).commit();
     }
 }

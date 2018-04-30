@@ -3,7 +3,6 @@ package com.bilal.backing.activities;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
-import android.view.MenuItem;
 
 import com.bilal.backing.R;
 import com.bilal.backing.Utils;
@@ -59,18 +58,31 @@ public class StepDetailActivity extends AppCompatActivity implements OnStepChang
     void changeStep(int toStep) {
         Step to = mRecipe.getSteps().get(toStep);
         setTitle(to.getShortDescription());
+//        Fragment fragment = fragmentManager.findFragmentByTag(Utils.STEP_FRAGMENT_TAG);
+//        if (fragment != null) {
+//            fragmentManager.popBackStackImmediate(Utils.STEP_FRAGMENT_TAG, 0);
+//            return;
+//        }
+//        fragment = StepDetailFragment.newInstance(mRecipe.getSteps().get(toStep), toStep + 1 == mRecipe.getSteps().size());
+//        fragmentManager.beginTransaction().replace(R.id.fr_step_detail, fragment).commit();
+
         fragmentManager.beginTransaction().replace(R.id.fr_step_detail,
                 StepDetailFragment.newInstance(to,
                         toStep + 1 == mRecipe.getSteps().size())).commit();
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                onBackPressed();
-                return true;
+    public void onBackPressed() {
+        int fragments = getSupportFragmentManager().getBackStackEntryCount();
+        if (fragments == 1) {
+            finish();
+        } else {
+            if (getFragmentManager().getBackStackEntryCount() > 1) {
+                getFragmentManager().popBackStack();
+            } else {
+                super.onBackPressed();
+            }
         }
-        return (super.onOptionsItemSelected(item));
     }
+
 }

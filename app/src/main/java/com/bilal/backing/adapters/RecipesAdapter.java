@@ -5,10 +5,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bilal.backing.R;
 import com.bilal.backing.models.Recipe;
+import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
@@ -45,12 +47,16 @@ public class RecipesAdapter extends BaseAdapter {
         LayoutInflater inflater = LayoutInflater.from(context);
         View item;
         if (convertView == null) {
+
             item = inflater.inflate(R.layout.item_recipe, parent, false);
             TextView name = item.findViewById(R.id.tv_name);
             TextView served = item.findViewById(R.id.tv_served);
+            ImageView recipePhoto = item.findViewById(R.id.im_recipe);
             name.setText(mRecipes.get(position).getName());
-            String servedText = context.getString(R.string.label_served) + " " + mRecipes.get(position).getServings();
-            served.setText(servedText);
+            served.setText(String.valueOf(mRecipes.get(position).getServings()));
+            String path = mRecipes.get(position).getImage();
+            if (!path.trim().isEmpty())
+                Picasso.get().load(path).into(recipePhoto);
         } else {
             item = convertView;
         }
