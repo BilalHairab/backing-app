@@ -69,7 +69,13 @@ public class StepsFragment extends Fragment implements OnStepSelected {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
+        if (savedInstanceState != null && savedInstanceState.containsKey(ARG_RECIPE)) {
+            mRecipe = savedInstanceState.getParcelable(ARG_RECIPE);
+            isTablet = savedInstanceState.getBoolean(ARG_TABLET);
+            linearLayoutManager.onRestoreInstanceState(savedInstanceState.getParcelable(STEPS_STATE));
+            if (mRecipe != null)
+                adapt();
+        } else if (getArguments() != null) {
             mRecipe = getArguments().getParcelable(ARG_RECIPE);
             isTablet = getArguments().getBoolean(ARG_TABLET);
         }
@@ -125,19 +131,6 @@ public class StepsFragment extends Fragment implements OnStepSelected {
         Log.e("bilal_onSaveFragment", "on");
     }
 
-    @Override
-    public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
-        super.onViewStateRestored(savedInstanceState);
-        if (savedInstanceState != null && savedInstanceState.containsKey(ARG_RECIPE)) {
-            mRecipe = savedInstanceState.getParcelable(ARG_RECIPE);
-            isTablet = savedInstanceState.getBoolean(ARG_TABLET);
-            linearLayoutManager.onRestoreInstanceState(savedInstanceState.getParcelable(STEPS_STATE));
-            if (mRecipe != null)
-                adapt();
-        }
-        Log.e("bilal_onSaveFragment", "onRestore");
-    }
-
     void adapt() {
         header.clear();
         ingredientsMap.clear();
@@ -146,6 +139,7 @@ public class StepsFragment extends Fragment implements OnStepSelected {
         IngredientsAdapter adapter = new IngredientsAdapter(context, header, ingredientsMap);
         listViewIngredients.setAdapter(adapter);
         MyRecyclerItemDecoration itemDecoration = new MyRecyclerItemDecoration(9, 4);
+        recyclerView.removeItemDecoration(itemDecoration);
         recyclerView.addItemDecoration(itemDecoration);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(linearLayoutManager);

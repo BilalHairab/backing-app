@@ -1,8 +1,9 @@
 package com.bilal.backing.activities;
 
+import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.util.Log;
 
 import com.bilal.backing.R;
@@ -18,6 +19,7 @@ public class RecipeDetailActivity extends AppCompatActivity implements OnStepCha
     boolean deviceIsTablet = false;
     FragmentManager fragmentManager;
     int lastPosition = -1;
+    final String RECIPE_FRAGMENT_TAG = "recipes";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,10 +28,12 @@ public class RecipeDetailActivity extends AppCompatActivity implements OnStepCha
         fragmentManager = getSupportFragmentManager();
         if (findViewById(R.id.fr_step_detail) != null)
             deviceIsTablet = true;
-
-        if (getIntent().hasExtra(Utils.RECIPE)) {
+        if (savedInstanceState != null && savedInstanceState.containsKey(Utils.RECIPE)) {
+            Log.e("bilal_onCreate", "saved");
+            mRecipe = savedInstanceState.getParcelable(Utils.RECIPE);
+        } else if (getIntent().hasExtra(Utils.RECIPE)) {
             Log.e("bilal_onCreate", "intent");
-            mRecipe = configureRecipeData(getIntent().getExtras());
+            mRecipe = getIntent().getExtras().getParcelable(Utils.RECIPE);
         }
     }
 
@@ -40,15 +44,10 @@ public class RecipeDetailActivity extends AppCompatActivity implements OnStepCha
         super.onSaveInstanceState(outState);
     }
 
-    @Override
-    protected void onRestoreInstanceState(Bundle savedInstanceState) {
-        super.onRestoreInstanceState(savedInstanceState);
-        if (savedInstanceState != null && savedInstanceState.containsKey(Utils.RECIPE)) {
-            Log.e("bilal_onCreate", "saved");
-            mRecipe = configureRecipeData(savedInstanceState);
-            setTitle(mRecipe.getName());
-        }
-    }
+//    @Override
+//    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+//        super.onRestoreInstanceState(savedInstanceState);
+//    }
 
     @Override
     public void onNextStep() {
@@ -66,6 +65,13 @@ public class RecipeDetailActivity extends AppCompatActivity implements OnStepCha
         }
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (mRecipe != null)
+            configureRecipeData();
+    }
+
     void changeStep(int toStep) {
         Step step = mRecipe.getSteps().get(toStep);
         setTitle(step.getShortDescription());
@@ -74,11 +80,15 @@ public class RecipeDetailActivity extends AppCompatActivity implements OnStepCha
                         toStep + 1 == mRecipe.getSteps().size())).commit();
     }
 
-    Recipe configureRecipeData(Bundle bundle) {
-        Recipe recipe = bundle.getParcelable(Utils.RECIPE);
-        setTitle(recipe.getName());
-        fragmentManager.beginTransaction().replace(R.id.fr_recipe_detail, StepsFragment.newInstance(recipe,
-                deviceIsTablet)).commit();
-        return recipe;
+    void configureRecipeData() {
+        setTitle(mRecipe.getName());
+        Fragment fragment = fragmentManager.findFragmentByTag(RECIPE_FRAGMENT_TAG);
+//        if (fragment != null) {
+//            fragmentManager.popBackStackImmediate(RECIPE_FRAGMENT_TAG, 0);
+//            return;
+//        }
+        fragment = StepsFragment.newInstance(mRecipe, deviceIsTablet);
+        fragmentManager.beginTransaction().replace(R.id.fr_recipe_detail, fragment).addToBackStack(RECIPE_FRAGMENT_TAG).commit();
+        return;
     }
 }

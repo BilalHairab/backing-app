@@ -1,8 +1,9 @@
 package com.bilal.backing.activities;
 
+import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
+import android.view.MenuItem;
 
 import com.bilal.backing.R;
 import com.bilal.backing.Utils;
@@ -61,5 +62,15 @@ public class StepDetailActivity extends AppCompatActivity implements OnStepChang
         fragmentManager.beginTransaction().replace(R.id.fr_step_detail,
                 StepDetailFragment.newInstance(to,
                         toStep + 1 == mRecipe.getSteps().size())).commit();
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                onBackPressed();
+                return true;
+        }
+        return (super.onOptionsItemSelected(item));
     }
 }
