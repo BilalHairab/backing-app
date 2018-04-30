@@ -9,6 +9,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -66,6 +67,15 @@ public class StepsFragment extends Fragment implements OnStepSelected {
     }
 
     @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if (getArguments() != null) {
+            mRecipe = getArguments().getParcelable(ARG_RECIPE);
+            isTablet = getArguments().getBoolean(ARG_TABLET);
+        }
+    }
+
+    @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_steps, container, false);
@@ -75,21 +85,12 @@ public class StepsFragment extends Fragment implements OnStepSelected {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         context = view.getContext();
         linearLayoutManager = new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false);
-        if (savedInstanceState != null && savedInstanceState.containsKey(ARG_RECIPE)) {
-            mRecipe = savedInstanceState.getParcelable(ARG_RECIPE);
-            isTablet = savedInstanceState.getBoolean(ARG_TABLET);
-            linearLayoutManager.onRestoreInstanceState(savedInstanceState.getParcelable(STEPS_STATE));
-        } else if (getArguments() != null) {
-            mRecipe = getArguments().getParcelable(ARG_RECIPE);
-            isTablet = getArguments().getBoolean(ARG_TABLET);
-        }
         ButterKnife.bind(this, view);
         if (mRecipe != null) {
             adapt();
         }
         super.onViewCreated(view, savedInstanceState);
     }
-
 
     @Override
     public void showStepInfo(int position) {
@@ -110,7 +111,7 @@ public class StepsFragment extends Fragment implements OnStepSelected {
             onStepChanged = (OnStepChanged) context;
         } catch (ClassCastException e) {
             throw new ClassCastException(context.toString()
-                    + " must implement MyInterface ");
+                    + " must implement OnStepChanged ");
         }
     }
 
@@ -121,6 +122,20 @@ public class StepsFragment extends Fragment implements OnStepSelected {
         outState.putParcelable(ARG_RECIPE, mRecipe);
         outState.putBoolean(ARG_TABLET, isTablet);
         super.onSaveInstanceState(outState);
+        Log.e("bilal_onSaveFragment", "on");
+    }
+
+    @Override
+    public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
+        super.onViewStateRestored(savedInstanceState);
+        if (savedInstanceState != null && savedInstanceState.containsKey(ARG_RECIPE)) {
+            mRecipe = savedInstanceState.getParcelable(ARG_RECIPE);
+            isTablet = savedInstanceState.getBoolean(ARG_TABLET);
+            linearLayoutManager.onRestoreInstanceState(savedInstanceState.getParcelable(STEPS_STATE));
+            if (mRecipe != null)
+                adapt();
+        }
+        Log.e("bilal_onSaveFragment", "onRestore");
     }
 
     void adapt() {

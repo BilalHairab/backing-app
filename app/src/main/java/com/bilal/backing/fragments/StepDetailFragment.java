@@ -1,19 +1,23 @@
 package com.bilal.backing.fragments;
 
-import android.annotation.SuppressLint;
+import android.app.Dialog;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import com.bilal.backing.R;
+import com.bilal.backing.activities.StepDetailActivity;
 import com.bilal.backing.interfaces.OnStepChanged;
 import com.bilal.backing.models.Step;
 import com.google.android.exoplayer2.DefaultLoadControl;
@@ -44,7 +48,8 @@ public class StepDetailFragment extends Fragment {
     long playbackPosition = 0;
     int currentWindow = 0;
     boolean playWhenReady = true;
-
+    View layout;
+    private boolean isTablet;
     @BindView(R.id.tv_step_description)
     TextView tvDescription;
 
@@ -53,6 +58,9 @@ public class StepDetailFragment extends Fragment {
 
     @BindView(R.id.exo_video)
     SimpleExoPlayerView playerView;
+
+    private boolean mExoPlayerFullscreen = false;
+    private Dialog mFullScreenDialog;
 
     public StepDetailFragment() {
 
@@ -86,9 +94,21 @@ public class StepDetailFragment extends Fragment {
         return inflater.inflate(R.layout.fragment_step_detail, container, false);
     }
 
+    private void initFullscreenDialog() {
+
+        mFullScreenDialog = new Dialog(context, android.R.style.Theme_Black_NoTitleBar_Fullscreen) {
+            public void onBackPressed() {
+                if (mExoPlayerFullscreen)
+                    closeFullscreenDialog();
+                super.onBackPressed();
+            }
+        };
+    }
+
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         ButterKnife.bind(this, view);
+        layout = view;
         context = view.getContext();
         super.onViewCreated(view, savedInstanceState);
     }
@@ -98,6 +118,7 @@ public class StepDetailFragment extends Fragment {
         super.onAttach(context);
         try {
             onStepChanged = (OnStepChanged) context;
+            isTablet = !(context instanceof StepDetailActivity);
         } catch (ClassCastException e) {
             throw new ClassCastException(context.toString()
                     + " must implement MyInterface ");
@@ -136,10 +157,11 @@ public class StepDetailFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        hideSystemUi();
+//        hideSystemUi();
         if ((Util.SDK_INT <= 23 || player == null)) {
             initializePlayer();
         }
+        initFullscreenDialog();
     }
 
     private void initializePlayer() {
@@ -186,14 +208,58 @@ public class StepDetailFragment extends Fragment {
             releasePlayer();
         }
     }
-
-    @SuppressLint("InlinedApi")
-    private void hideSystemUi() {
-        playerView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE
-                | View.SYSTEM_UI_FLAG_FULLSCREEN
-                | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+//
+//    @SuppressLint("InlinedApi")
+//    private void hideSystemUi() {
+//        playerView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE
+//                | View.SYSTEM_UI_FLAG_FULLSCREEN
+//                | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+//                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
 //                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
+//                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
+//    }
+//
+//    void toggleFullScreenMode(boolean isFullScreen) {
+//        ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) playerView.getLayoutParams();
+//        if (isFullScreen && !isTablet) {
+//            params.width = params.MATCH_PARENT;
+//            params.height = params.MATCH_PARENT;
+//        } else {
+//            params.width = params.MATCH_PARENT;
+//            params.height = 0;
+//        }
+//        playerView.setLayoutParams(params);
+//
+//    }
+
+    private void openFullscreenDialog() {
+
+        ((ViewGroup) playerView.getParent()).removeView(playerView);
+        mFullScreenDialog.addContentView(playerView, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        mExoPlayerFullscreen = true;
+        mFullScreenDialog.show();
+    }
+
+
+    private void closeFullscreenDialog() {
+
+        ((ViewGroup) playerView.getParent()).removeView(playerView);
+        ((FrameLayout) layout.findViewById(R.id.main_media_frame)).addView(playerView);
+        mExoPlayerFullscreen = false;
+        mFullScreenDialog.dismiss();
+//        mFullScreenIcon.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_fullscreen_expand));
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        Log.e("bilal_config", "changed");
+        if (!isTablet) {
+            if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                openFullscreenDialog();
+            } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
+                closeFullscreenDialog();
+            }
+        }
     }
 }

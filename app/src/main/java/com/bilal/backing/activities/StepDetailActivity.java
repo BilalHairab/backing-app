@@ -62,18 +62,4 @@ public class StepDetailActivity extends AppCompatActivity implements OnStepChang
                 StepDetailFragment.newInstance(to,
                         toStep + 1 == mRecipe.getSteps().size())).commit();
     }
-
-//    @Override
-//    public boolean onOptionsItemSelected(MenuItem item) {
-//        switch (item.getItemId()) {
-//            case android.R.id.home:
-//                if (lastPosition == 0) {
-//                    onBackPressed();
-//                } else {
-//                    lastPosition--;
-//                    changeStep(lastPosition);
-//                }
-//        }
-//        return true;
-//    }
 }

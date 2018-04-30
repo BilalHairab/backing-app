@@ -11,28 +11,23 @@ import com.bilal.backing.fragments.StepDetailFragment;
 import com.bilal.backing.fragments.StepsFragment;
 import com.bilal.backing.interfaces.OnStepChanged;
 import com.bilal.backing.models.Recipe;
+import com.bilal.backing.models.Step;
 
 public class RecipeDetailActivity extends AppCompatActivity implements OnStepChanged {
     Recipe mRecipe;
     boolean deviceIsTablet = false;
     FragmentManager fragmentManager;
     int lastPosition = -1;
-    OnStepChanged onStepChanged;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_recipe_detail);
         fragmentManager = getSupportFragmentManager();
-        onStepChanged = RecipeDetailActivity.this;
         if (findViewById(R.id.fr_step_detail) != null)
             deviceIsTablet = true;
 
-        if (savedInstanceState != null && savedInstanceState.containsKey(Utils.RECIPE)) {
-            Log.e("bilal_onCreate", "saved");
-            mRecipe = savedInstanceState.getParcelable(Utils.RECIPE);
-            setTitle(mRecipe.getName());
-        } else if (getIntent().hasExtra(Utils.RECIPE)) {
+        if (getIntent().hasExtra(Utils.RECIPE)) {
             Log.e("bilal_onCreate", "intent");
             mRecipe = configureRecipeData(getIntent().getExtras());
         }
@@ -43,6 +38,16 @@ public class RecipeDetailActivity extends AppCompatActivity implements OnStepCha
         if (mRecipe != null)
             outState.putParcelable(Utils.RECIPE, mRecipe);
         super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        if (savedInstanceState != null && savedInstanceState.containsKey(Utils.RECIPE)) {
+            Log.e("bilal_onCreate", "saved");
+            mRecipe = configureRecipeData(savedInstanceState);
+            setTitle(mRecipe.getName());
+        }
     }
 
     @Override
@@ -62,6 +67,8 @@ public class RecipeDetailActivity extends AppCompatActivity implements OnStepCha
     }
 
     void changeStep(int toStep) {
+        Step step = mRecipe.getSteps().get(toStep);
+        setTitle(step.getShortDescription());
         fragmentManager.beginTransaction().replace(R.id.fr_step_detail,
                 StepDetailFragment.newInstance(mRecipe.getSteps().get(toStep),
                         toStep + 1 == mRecipe.getSteps().size())).commit();
