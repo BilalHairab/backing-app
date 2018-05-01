@@ -5,9 +5,14 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.widget.Toast;
 
 import com.bilal.backing.R;
 import com.bilal.backing.Utils;
+import com.bilal.backing.data.SharedPreferenceUtils;
 import com.bilal.backing.fragments.StepDetailFragment;
 import com.bilal.backing.fragments.StepsFragment;
 import com.bilal.backing.interfaces.OnStepChanged;
@@ -19,6 +24,7 @@ public class RecipeDetailActivity extends AppCompatActivity implements OnStepCha
     boolean deviceIsTablet = false;
     FragmentManager fragmentManager;
     int lastPosition = -1;
+    boolean isFavorite = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,10 +49,38 @@ public class RecipeDetailActivity extends AppCompatActivity implements OnStepCha
         super.onSaveInstanceState(outState);
     }
 
-//    @Override
-//    protected void onRestoreInstanceState(Bundle savedInstanceState) {
-//        super.onRestoreInstanceState(savedInstanceState);
-//    }
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.recipe_menu, menu);
+        MenuItem item = menu.getItem(0);
+        isFavorite = SharedPreferenceUtils.checkIfRecipeIsFavorite(this, mRecipe);
+        if (isFavorite)
+            item.setIcon(R.drawable.ic_unfavorite);
+        else item.setIcon(R.drawable.ic_favorite);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        String toastMessage = mRecipe.getName() + " ";
+        switch (item.getItemId()) {
+            case R.id.ic_favorite:
+                if (isFavorite) {
+                    SharedPreferenceUtils.removeFavoriteRecipe(this);
+                    item.setIcon(R.drawable.ic_favorite);
+                    toastMessage += getString(R.string.un_favorite_message);
+                } else {
+                    SharedPreferenceUtils.setFavoriteRecipe(this, mRecipe);
+                    item.setIcon(R.drawable.ic_unfavorite);
+                    toastMessage += getString(R.string.favorite_message);
+                }
+                Toast.makeText(this, toastMessage, Toast.LENGTH_LONG).show();
+                isFavorite = !isFavorite;
+                break;
+        }
+        return super.onOptionsItemSelected(item);
+    }
 
     @Override
     public void onBackPressed() {
