@@ -72,6 +72,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     void adaptRecipes(ArrayList<Recipe> recipeArrayList) {
+
         RecipesAdapter adapter = new RecipesAdapter(MainActivity.this, recipeArrayList);
         gridView.setAdapter(adapter);
         gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {

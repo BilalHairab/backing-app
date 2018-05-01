@@ -39,6 +39,7 @@ public class RecipeDetailActivity extends AppCompatActivity implements OnStepCha
         } else if (getIntent().hasExtra(Utils.RECIPE)) {
             Log.e("bilal_onCreate", "intent");
             mRecipe = getIntent().getExtras().getParcelable(Utils.RECIPE);
+            configureRecipeData();
         }
     }
 
@@ -63,23 +64,28 @@ public class RecipeDetailActivity extends AppCompatActivity implements OnStepCha
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        String toastMessage = mRecipe.getName() + " ";
         switch (item.getItemId()) {
             case R.id.ic_favorite:
-                if (isFavorite) {
-                    SharedPreferenceUtils.removeFavoriteRecipe(this);
-                    item.setIcon(R.drawable.ic_favorite);
-                    toastMessage += getString(R.string.un_favorite_message);
-                } else {
-                    SharedPreferenceUtils.setFavoriteRecipe(this, mRecipe);
-                    item.setIcon(R.drawable.ic_unfavorite);
-                    toastMessage += getString(R.string.favorite_message);
+                if (mRecipe != null) {
+                    String toastMessage = mRecipe.getName() + " ";
+                    if (isFavorite) {
+                        SharedPreferenceUtils.removeFavoriteRecipe(this);
+                        item.setIcon(R.drawable.ic_favorite);
+                        toastMessage += getString(R.string.un_favorite_message);
+                    } else {
+                        SharedPreferenceUtils.setFavoriteRecipe(this, mRecipe);
+                        item.setIcon(R.drawable.ic_unfavorite);
+                        toastMessage += getString(R.string.favorite_message);
+                    }
+                    Toast.makeText(this, toastMessage, Toast.LENGTH_LONG).show();
+                    isFavorite = !isFavorite;
+                    break;
                 }
-                Toast.makeText(this, toastMessage, Toast.LENGTH_LONG).show();
-                isFavorite = !isFavorite;
+            case android.R.id.home:
+                onBackPressed();
                 break;
         }
-        return super.onOptionsItemSelected(item);
+        return true;
     }
 
     @Override
@@ -110,13 +116,6 @@ public class RecipeDetailActivity extends AppCompatActivity implements OnStepCha
             lastPosition = position;
             changeStep(lastPosition);
         }
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        if (mRecipe != null)
-            configureRecipeData();
     }
 
     void changeStep(int toStep) {

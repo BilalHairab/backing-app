@@ -49,8 +49,8 @@ public class IngredientsAdapter extends BaseExpandableListAdapter {
         TextView tvName = convertView.findViewById(R.id.tv_ingredient_name);
         TextView tvQuantity = convertView.findViewById(R.id.tv_ingredient_quantity);
         tvName.setText(ingredient.getIngredient());
-        String quatity = ingredient.getQuantity() + " " + ingredient.getMeasure();
-        tvQuantity.setText(quatity);
+        String quantity = ingredient.getQuantity() + " " + ingredient.getMeasure();
+        tvQuantity.setText(quantity);
         return convertView;
     }
 

@@ -31,6 +31,7 @@
         android:id="@+id/btn_next"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@color/sun_flower"
         android:text="@string/button_next"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -52,6 +53,11 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:gravity="center" />
+            android:background="@drawable/desc_background"
+            android:gravity="center"
+            android:text="test for background purpose"
+            android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"/>
+            <!--android:textColor="@android:color/black"-->
+            <!--/>-->
     </ScrollView>
 </android.support.constraint.ConstraintLayout>

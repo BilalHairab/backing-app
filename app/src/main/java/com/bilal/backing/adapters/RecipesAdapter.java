@@ -44,22 +44,19 @@ public class RecipesAdapter extends BaseAdapter {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        LayoutInflater inflater = LayoutInflater.from(context);
-        View item;
-        if (convertView == null) {
-
-            item = inflater.inflate(R.layout.item_recipe, parent, false);
-            TextView name = item.findViewById(R.id.tv_name);
-            TextView served = item.findViewById(R.id.tv_served);
-            ImageView recipePhoto = item.findViewById(R.id.im_recipe);
-            name.setText(mRecipes.get(position).getName());
-            served.setText(String.valueOf(mRecipes.get(position).getServings()));
-            String path = mRecipes.get(position).getImage();
+        LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        if (convertView == null && inflater != null) {
+            convertView = inflater.inflate(R.layout.item_recipe, parent, false);
+            Recipe recipe = mRecipes.get(position);
+            TextView name = convertView.findViewById(R.id.tv_name);
+            TextView served = convertView.findViewById(R.id.tv_served);
+            ImageView recipePhoto = convertView.findViewById(R.id.im_recipe);
+            name.setText(recipe.getName());
+            served.setText(String.valueOf(recipe.getServings()));
+            String path = recipe.getImage();
             if (!path.trim().isEmpty())
                 Picasso.get().load(path).into(recipePhoto);
-        } else {
-            item = convertView;
         }
-        return item;
+        return convertView;
     }
 }

@@ -36,7 +36,6 @@ import butterknife.ButterKnife;
 public class StepsFragment extends Fragment implements OnStepSelected {
     private static final String ARG_RECIPE = "recipe";
     private static final String ARG_TABLET = "tablet";
-    //    private static final String ARG_STEP_CHANGED = "changed";
     @BindView(R.id.elv_ingredients)
     ExpandableListView listViewIngredients;
 
@@ -45,6 +44,7 @@ public class StepsFragment extends Fragment implements OnStepSelected {
 
     Recipe mRecipe;
     boolean isTablet;
+    boolean isExpanded = false;
     OnStepChanged onStepChanged;
     HashMap<String, List<Ingredient>> ingredientsMap = new HashMap<>();
     static final String STEPS_STATE = "steps_state";
@@ -72,9 +72,7 @@ public class StepsFragment extends Fragment implements OnStepSelected {
         if (savedInstanceState != null && savedInstanceState.containsKey(ARG_RECIPE)) {
             mRecipe = savedInstanceState.getParcelable(ARG_RECIPE);
             isTablet = savedInstanceState.getBoolean(ARG_TABLET);
-            linearLayoutManager.onRestoreInstanceState(savedInstanceState.getParcelable(STEPS_STATE));
-            if (mRecipe != null)
-                adapt();
+            stepsState = savedInstanceState.getParcelable(STEPS_STATE);
         } else if (getArguments() != null) {
             mRecipe = getArguments().getParcelable(ARG_RECIPE);
             isTablet = getArguments().getBoolean(ARG_TABLET);
