@@ -6,11 +6,13 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bilal.backing.R;
 import com.bilal.backing.interfaces.OnStepSelected;
 import com.bilal.backing.models.Step;
+import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
@@ -42,6 +44,10 @@ public class StepsAdapter extends RecyclerView.Adapter<StepsAdapter.StepHolder> 
     @Override
     public void onBindViewHolder(@NonNull final StepHolder holder, final int position) {
         holder.tvStep.setText(steps.get(position).getShortDescription());
+        String path = steps.get(position).getThumbnailURL();
+        if (!path.trim().contentEquals(""))
+            Picasso.get().load(path).into(holder.imStep);
+        holder.tvStep.setText(steps.get(position).getShortDescription());
         holder.item.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -58,6 +64,9 @@ public class StepsAdapter extends RecyclerView.Adapter<StepsAdapter.StepHolder> 
     class StepHolder extends RecyclerView.ViewHolder {
         @BindView(R.id.tv_step)
         TextView tvStep;
+
+        @BindView(R.id.im_step)
+        ImageView imStep;
         View item;
 
         StepHolder(View itemView) {
