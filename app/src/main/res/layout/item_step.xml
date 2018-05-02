@@ -25,16 +25,18 @@
 
         <TextView
             android:id="@+id/tv_step"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_marginBottom="8dp"
+            android:layout_marginEnd="8dp"
             android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
-            android:gravity="center"
+            android:gravity="start"
             android:singleLine="false"
             android:textAppearance="@style/Base.TextAppearance.AppCompat.Large"
             app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/im_step"
             app:layout_constraintTop_toTopOf="@+id/im_step" />
     </android.support.constraint.ConstraintLayout>

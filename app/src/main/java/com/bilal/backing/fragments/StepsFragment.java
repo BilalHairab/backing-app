@@ -10,25 +10,23 @@ import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ExpandableListView;
+import android.widget.Button;
 
 import com.bilal.backing.R;
 import com.bilal.backing.Utils;
 import com.bilal.backing.activities.StepDetailActivity;
-import com.bilal.backing.adapters.IngredientsAdapter;
 import com.bilal.backing.adapters.StepsAdapter;
 import com.bilal.backing.interfaces.OnStepChanged;
 import com.bilal.backing.interfaces.OnStepSelected;
-import com.bilal.backing.models.Ingredient;
 import com.bilal.backing.models.Recipe;
 import com.bilal.backing.views.MyRecyclerItemDecoration;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import com.bilal.backing.views.SimpleCustomPop;
+import com.flyco.animation.BounceEnter.BounceBottomEnter;
+import com.flyco.animation.SlideExit.SlideBottomExit;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -36,22 +34,23 @@ import butterknife.ButterKnife;
 public class StepsFragment extends Fragment implements OnStepSelected {
     private static final String ARG_RECIPE = "recipe";
     private static final String ARG_TABLET = "tablet";
-    @BindView(R.id.elv_ingredients)
-    ExpandableListView listViewIngredients;
+//    @BindView(R.id.elv_ingredients)
+//    ExpandableListView listViewIngredients;
+
+    @BindView(R.id.btn_ingredients)
+    Button btnIngredients;
 
     @BindView(R.id.rv_steps)
     RecyclerView recyclerView;
 
     Recipe mRecipe;
     boolean isTablet;
-    boolean isExpanded = false;
     OnStepChanged onStepChanged;
-    HashMap<String, List<Ingredient>> ingredientsMap = new HashMap<>();
     static final String STEPS_STATE = "steps_state";
     Parcelable stepsState;
-    List<String> header = new ArrayList<>();
     LinearLayoutManager linearLayoutManager;
     Context context;
+    SimpleCustomPop mQuickCustomPopup;
 
     public StepsFragment() {
 
@@ -93,6 +92,21 @@ public class StepsFragment extends Fragment implements OnStepSelected {
         if (mRecipe != null) {
             adapt();
         }
+        btnIngredients.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mQuickCustomPopup != null) {
+                    mQuickCustomPopup
+                            .anchorView(btnIngredients)
+                            .offset(10, -5)
+                            .gravity(Gravity.BOTTOM)
+                            .showAnim(new BounceBottomEnter())
+                            .dismissAnim(new SlideBottomExit())
+                            .dimEnabled(true)
+                            .show();
+                }
+            }
+        });
         super.onViewCreated(view, savedInstanceState);
     }
 
@@ -130,12 +144,7 @@ public class StepsFragment extends Fragment implements OnStepSelected {
     }
 
     void adapt() {
-        header.clear();
-        ingredientsMap.clear();
-        header.add("Ingredients");
-        ingredientsMap.put(header.get(0), mRecipe.getIngredients());
-        IngredientsAdapter adapter = new IngredientsAdapter(context, header, ingredientsMap);
-        listViewIngredients.setAdapter(adapter);
+        mQuickCustomPopup = new SimpleCustomPop(context, mRecipe.getIngredients());
         MyRecyclerItemDecoration itemDecoration = new MyRecyclerItemDecoration(9, 4);
         recyclerView.removeItemDecoration(itemDecoration);
         recyclerView.addItemDecoration(itemDecoration);

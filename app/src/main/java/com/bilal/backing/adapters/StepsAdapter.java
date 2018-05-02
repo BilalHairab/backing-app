@@ -8,9 +8,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.bilal.backing.R;
 import com.bilal.backing.interfaces.OnStepSelected;
 import com.bilal.backing.models.Step;
-import com.bilal.backing.R;
 
 import java.util.List;
 
@@ -42,7 +42,7 @@ public class StepsAdapter extends RecyclerView.Adapter<StepsAdapter.StepHolder> 
     @Override
     public void onBindViewHolder(@NonNull final StepHolder holder, final int position) {
         holder.tvStep.setText(steps.get(position).getShortDescription());
-        holder.tvStep.setOnClickListener(new View.OnClickListener() {
+        holder.item.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 onStepItemClick.showStepInfo(holder.getAdapterPosition());
@@ -58,10 +58,12 @@ public class StepsAdapter extends RecyclerView.Adapter<StepsAdapter.StepHolder> 
     class StepHolder extends RecyclerView.ViewHolder {
         @BindView(R.id.tv_step)
         TextView tvStep;
+        View item;
 
         StepHolder(View itemView) {
             super(itemView);
             ButterKnife.bind(this, itemView);
+            item = itemView;
         }
 
     }

@@ -6,13 +6,15 @@
 
     <TextView
         android:id="@+id/tv_ingredient_name"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_gravity="start"
         android:layout_marginBottom="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:layout_toStartOf="@+id/tv_ingredient_quantity"
+        android:gravity="start"
         android:singleLine="false"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/tv_ingredient_quantity"
@@ -26,5 +28,6 @@
         android:layout_marginEnd="8dp"
         app:layout_constraintBottom_toBottomOf="@+id/tv_ingredient_name"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/tv_ingredient_name"
         app:layout_constraintTop_toTopOf="@+id/tv_ingredient_name" />
 </android.support.constraint.ConstraintLayout>
