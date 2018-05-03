@@ -34,8 +34,6 @@ import butterknife.ButterKnife;
 public class StepsFragment extends Fragment implements OnStepSelected {
     private static final String ARG_RECIPE = "recipe";
     private static final String ARG_TABLET = "tablet";
-//    @BindView(R.id.elv_ingredients)
-//    ExpandableListView listViewIngredients;
 
     @BindView(R.id.btn_ingredients)
     Button btnIngredients;

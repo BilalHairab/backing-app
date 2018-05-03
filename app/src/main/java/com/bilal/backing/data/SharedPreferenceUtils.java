@@ -1,10 +1,14 @@
 package com.bilal.backing.data;
 
+import android.appwidget.AppWidgetManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import com.bilal.backing.R;
 import com.bilal.backing.Utils;
 import com.bilal.backing.models.Recipe;
+import com.bilal.backing.widget.RecipeWidgetProvider;
 import com.google.gson.Gson;
 
 import static com.bilal.backing.Utils.FAVORITE_RECIPE;
@@ -25,6 +29,7 @@ public class SharedPreferenceUtils {
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString(FAVORITE_RECIPE, recipeString);
         editor.apply();
+        updateWidget(context);
     }
 
     public static Recipe getFavoriteRecipe(Context context) {
@@ -40,6 +45,7 @@ public class SharedPreferenceUtils {
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString(FAVORITE_RECIPE, defaultResult);
         editor.apply();
+        updateWidget(context);
     }
 
     private static String recipeToString(Recipe recipe) {
@@ -50,6 +56,15 @@ public class SharedPreferenceUtils {
     private static Recipe stringToRecipe(String string) {
         Gson gson = new Gson();
         return gson.fromJson(string, Recipe.class);
+    }
+
+    public static void updateWidget(Context context) {
+        AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
+        int[] widgetIds = appWidgetManager.getAppWidgetIds(new ComponentName(context, RecipeWidgetProvider.class));
+        appWidgetManager.notifyAppWidgetViewDataChanged(widgetIds, R.layout.popup_ingredients);
+        for (int id : widgetIds)
+            RecipeWidgetProvider.updateAppWidget(context, appWidgetManager, id);
+
     }
 
 }
