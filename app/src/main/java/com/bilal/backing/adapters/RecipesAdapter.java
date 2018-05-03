@@ -1,40 +1,46 @@
 package com.bilal.backing.adapters;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bilal.backing.R;
+import com.bilal.backing.interfaces.OnRecipeSelected;
 import com.bilal.backing.models.Recipe;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
-public class RecipesAdapter extends BaseAdapter {
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
+public class RecipesAdapter extends RecyclerView.Adapter<RecipesAdapter.RecipeHolder> {
 
     private List<Recipe> mRecipes;
-    private Context context;
+    private OnRecipeSelected onRecipeSelected;
 
-    public RecipesAdapter(Context context, List<Recipe> list) {
-        this.context = context;
+    public RecipesAdapter(List<Recipe> list, OnRecipeSelected onRecipeSelected) {
         this.mRecipes = list;
+        this.onRecipeSelected = onRecipeSelected;
+    }
+
+    @NonNull
+    @Override
+    public RecipeHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        Context context = parent.getContext();
+        LayoutInflater inflater = LayoutInflater.from(context);
+        View view = inflater.inflate(R.layout.item_recipe, parent, false);
+        return new RecipeHolder(view);
     }
 
     @Override
-    public int getCount() {
+    public int getItemCount() {
         return mRecipes.size();
-    }
-
-    @Override
-    public Recipe getItem(int position) {
-        if (position >= mRecipes.size())
-            return null;
-        else
-            return mRecipes.get(position);
     }
 
     @Override
@@ -43,20 +49,37 @@ public class RecipesAdapter extends BaseAdapter {
     }
 
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-        LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        if (convertView == null && inflater != null) {
-            convertView = inflater.inflate(R.layout.item_recipe, parent, false);
-            Recipe recipe = mRecipes.get(position);
-            TextView name = convertView.findViewById(R.id.tv_name);
-            TextView served = convertView.findViewById(R.id.tv_served);
-            ImageView recipePhoto = convertView.findViewById(R.id.im_recipe);
-            name.setText(recipe.getName());
-            served.setText(String.valueOf(recipe.getServings()));
-            String path = recipe.getImage();
-            if (!path.trim().isEmpty())
-                Picasso.get().load(path).into(recipePhoto);
-        }
-        return convertView;
+    public void onBindViewHolder(@NonNull final RecipeHolder holder, final int position) {
+        holder.tvName.setText(mRecipes.get(holder.getAdapterPosition()).getName());
+        String path = mRecipes.get(holder.getAdapterPosition()).getImage();
+        if (!path.trim().contentEquals(""))
+            Picasso.get().load(path).into(holder.imStep);
+        holder.tvServed.setText(String.valueOf(mRecipes.get(holder.getAdapterPosition()).getServings()));
+        holder.item.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onRecipeSelected.onRecipeChoose(holder.getAdapterPosition());
+            }
+        });
     }
+
+    class RecipeHolder extends RecyclerView.ViewHolder {
+        @BindView(R.id.tv_name)
+        TextView tvName;
+
+        @BindView(R.id.tv_served)
+        TextView tvServed;
+
+        @BindView(R.id.imageView2)
+        ImageView imStep;
+        View item;
+
+        RecipeHolder(View itemView) {
+            super(itemView);
+            ButterKnife.bind(this, itemView);
+            item = itemView;
+        }
+
+    }
+
 }

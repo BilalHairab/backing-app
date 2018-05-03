@@ -1,19 +1,21 @@
 package com.bilal.backing.activities;
 
 import android.content.Intent;
+import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.view.View;
-import android.widget.AdapterView;
-import android.widget.GridView;
 
 import com.bilal.backing.R;
 import com.bilal.backing.Utils;
 import com.bilal.backing.adapters.RecipesAdapter;
+import com.bilal.backing.interfaces.OnRecipeSelected;
 import com.bilal.backing.interfaces.RecipesService;
 import com.bilal.backing.models.Recipe;
+import com.bilal.backing.views.MyRecyclerItemDecoration;
 
 import java.util.ArrayList;
 
@@ -25,12 +27,15 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements OnRecipeSelected {
 
-    @BindView(R.id.gv_recipes)
-    GridView gridView;
+    @BindView(R.id.rv_recipes)
+    RecyclerView recyclerView;
 
     ArrayList<Recipe> recipes;
+    LinearLayoutManager linearLayoutManager;
+    static final String STEPS_STATE = "steps_state";
+    Parcelable stepsState;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,23 +71,30 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-        if (recipes.size() > 0)
+        if (recipes.size() > 0) {
             outState.putParcelableArrayList(Utils.RECIPES, recipes);
+            outState.putParcelable(STEPS_STATE, linearLayoutManager.onSaveInstanceState());
+        }
         super.onSaveInstanceState(outState);
     }
 
     void adaptRecipes(ArrayList<Recipe> recipeArrayList) {
+        linearLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
+        MyRecyclerItemDecoration itemDecoration = new MyRecyclerItemDecoration(9, 4);
+        recyclerView.removeItemDecoration(itemDecoration);
+        recyclerView.addItemDecoration(itemDecoration);
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setLayoutManager(linearLayoutManager);
+        RecipesAdapter adapter = new RecipesAdapter(recipeArrayList, this);
+        recyclerView.setAdapter(adapter);
+        if (stepsState != null)
+            linearLayoutManager.onRestoreInstanceState(stepsState);
+    }
 
-        RecipesAdapter adapter = new RecipesAdapter(MainActivity.this, recipeArrayList);
-        gridView.setAdapter(adapter);
-        gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Intent x = new Intent(MainActivity.this, RecipeDetailActivity.class);
-                x.putExtra(Utils.RECIPE, recipes.get(position));
-                startActivity(x);
-            }
-        });
-
+    @Override
+    public void onRecipeChoose(int position) {
+        Intent x = new Intent(MainActivity.this, RecipeDetailActivity.class);
+        x.putExtra(Utils.RECIPE, recipes.get(position));
+        startActivity(x);
     }
 }
