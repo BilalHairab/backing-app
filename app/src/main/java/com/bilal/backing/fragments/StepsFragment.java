@@ -47,6 +47,7 @@ public class StepsFragment extends Fragment implements OnStepSelected {
     boolean isTablet;
     OnStepChanged onStepChanged;
     static final String STEPS_STATE = "steps_state";
+    static final String LIST_STATE = "list";
     Parcelable stepsState;
     LinearLayoutManager linearLayoutManager;
     Context context;
@@ -86,7 +87,12 @@ public class StepsFragment extends Fragment implements OnStepSelected {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
         context = view.getContext();
+        mQuickCustomPopup = new SimpleCustomPop(context, mRecipe.getIngredients());
+        if (savedInstanceState != null && savedInstanceState.getBoolean(LIST_STATE) && !mQuickCustomPopup.isShowing())
+            showIngredientsList();
+
         linearLayoutManager = new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false);
         ButterKnife.bind(this, view);
         if (mRecipe != null) {
@@ -96,18 +102,10 @@ public class StepsFragment extends Fragment implements OnStepSelected {
             @Override
             public void onClick(View v) {
                 if (mQuickCustomPopup != null) {
-                    mQuickCustomPopup
-                            .anchorView(btnIngredients)
-                            .offset(10, -5)
-                            .gravity(Gravity.BOTTOM)
-                            .showAnim(new BounceBottomEnter())
-                            .dismissAnim(new SlideBottomExit())
-                            .dimEnabled(true)
-                            .show();
+                    showIngredientsList();
                 }
             }
         });
-        super.onViewCreated(view, savedInstanceState);
     }
 
     @Override
@@ -137,14 +135,26 @@ public class StepsFragment extends Fragment implements OnStepSelected {
     public void onSaveInstanceState(@NonNull Bundle outState) {
         if (linearLayoutManager != null)
             outState.putParcelable(STEPS_STATE, linearLayoutManager.onSaveInstanceState());
+        if (mQuickCustomPopup != null && mQuickCustomPopup.isShowing())
+            outState.putBoolean(LIST_STATE, true);
         outState.putParcelable(ARG_RECIPE, mRecipe);
         outState.putBoolean(ARG_TABLET, isTablet);
         super.onSaveInstanceState(outState);
         Log.e("bilal_onSaveFragment", "on");
     }
 
+    void showIngredientsList() {
+        mQuickCustomPopup
+                .anchorView(btnIngredients)
+                .offset(10, -5)
+                .gravity(Gravity.BOTTOM)
+                .showAnim(new BounceBottomEnter())
+                .dismissAnim(new SlideBottomExit())
+                .dimEnabled(true)
+                .show();
+    }
+
     void adapt() {
-        mQuickCustomPopup = new SimpleCustomPop(context, mRecipe.getIngredients());
         MyRecyclerItemDecoration itemDecoration = new MyRecyclerItemDecoration(9, 4);
         recyclerView.removeItemDecoration(itemDecoration);
         recyclerView.addItemDecoration(itemDecoration);
