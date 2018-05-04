@@ -8,7 +8,6 @@ import android.content.Intent;
 import android.widget.RemoteViews;
 
 import com.bilal.backing.R;
-import com.bilal.backing.Utils;
 import com.bilal.backing.activities.RecipeDetailActivity;
 import com.bilal.backing.data.SharedPreferenceUtils;
 import com.bilal.backing.models.Recipe;
@@ -42,9 +41,8 @@ public class RecipeWidgetProvider extends AppWidgetProvider {
             rv.setTextViewText(R.id.tv_title, title);
             Intent intent = new Intent(context, IngredientWidgetService.class);
             rv.setRemoteAdapter(R.id.lv_ingredients, intent);
-            Intent detailsIntent = new Intent(context, RecipeDetailActivity.class);
-            detailsIntent.putExtra(Utils.RECIPE, favoriteRecipe);
-            PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, detailsIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+            Intent toDetails = new Intent(context, RecipeDetailActivity.class);
+            PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, toDetails, 0);
             rv.setPendingIntentTemplate(R.id.lv_ingredients, pendingIntent);
         }
     }

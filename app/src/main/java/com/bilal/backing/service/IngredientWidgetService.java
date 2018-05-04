@@ -1,7 +1,6 @@
 package com.bilal.backing.service;
 
 import android.content.Intent;
-import android.util.Log;
 import android.widget.RemoteViewsService;
 
 import com.bilal.backing.adapters.IngredientsViewFactory;
