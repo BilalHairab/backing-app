@@ -4,6 +4,9 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.annotation.VisibleForTesting;
+import android.support.test.espresso.IdlingResource;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -12,6 +15,7 @@ import android.util.Log;
 import com.bilal.backing.R;
 import com.bilal.backing.Utils;
 import com.bilal.backing.adapters.RecipesAdapter;
+import com.bilal.backing.idling.MainActivityIdlingResource;
 import com.bilal.backing.interfaces.OnRecipeSelected;
 import com.bilal.backing.interfaces.RecipesService;
 import com.bilal.backing.models.Recipe;
@@ -32,10 +36,12 @@ public class MainActivity extends AppCompatActivity implements OnRecipeSelected 
     @BindView(R.id.rv_recipes)
     RecyclerView recyclerView;
 
-    ArrayList<Recipe> recipes;
+    public ArrayList<Recipe> recipes;
     LinearLayoutManager linearLayoutManager;
     static final String STEPS_STATE = "steps_state";
     Parcelable stepsState;
+    @Nullable
+    private MainActivityIdlingResource mIdlingResource;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -96,5 +102,14 @@ public class MainActivity extends AppCompatActivity implements OnRecipeSelected 
         Intent x = new Intent(MainActivity.this, RecipeDetailActivity.class);
         x.putExtra(Utils.RECIPE, recipes.get(position));
         startActivity(x);
+    }
+
+    @VisibleForTesting
+    @NonNull
+    public IdlingResource getIdlingResource() {
+        if (mIdlingResource == null) {
+            mIdlingResource = new MainActivityIdlingResource();
+        }
+        return mIdlingResource;
     }
 }
