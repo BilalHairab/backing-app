@@ -13,7 +13,7 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 
 import com.bilal.backing.R;
-import com.bilal.backing.Utils;
+import com.bilal.backing.utils.Utils;
 import com.bilal.backing.adapters.RecipesAdapter;
 import com.bilal.backing.idling.MainActivityIdlingResource;
 import com.bilal.backing.interfaces.OnRecipeSelected;

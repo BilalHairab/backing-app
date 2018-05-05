@@ -9,7 +9,7 @@
         android:id="@+id/btn_ingredients"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/sun_flower"
+        android:background="@color/shiny_green"
         android:text="@string/label_ingredients" />
     <!--<ExpandableListView-->
     <!--android:id="@+id/elv_ingredients"-->

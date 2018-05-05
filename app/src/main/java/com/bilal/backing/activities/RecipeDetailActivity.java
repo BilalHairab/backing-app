@@ -1,6 +1,7 @@
 package com.bilal.backing.activities;
 
 import android.os.Bundle;
+import android.support.annotation.VisibleForTesting;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
@@ -11,20 +12,22 @@ import android.view.MenuItem;
 import android.widget.Toast;
 
 import com.bilal.backing.R;
-import com.bilal.backing.Utils;
 import com.bilal.backing.data.SharedPreferenceUtils;
 import com.bilal.backing.fragments.StepDetailFragment;
 import com.bilal.backing.fragments.StepsFragment;
 import com.bilal.backing.interfaces.OnStepChanged;
 import com.bilal.backing.models.Recipe;
 import com.bilal.backing.models.Step;
+import com.bilal.backing.utils.Utils;
 
 public class RecipeDetailActivity extends AppCompatActivity implements OnStepChanged {
-    Recipe mRecipe;
+    @VisibleForTesting
+    public Recipe mRecipe;
     boolean deviceIsTablet = false;
     FragmentManager fragmentManager;
     int lastPosition = -1;
-    boolean isFavorite = false;
+    @VisibleForTesting
+    public boolean isFavorite = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,8 +80,8 @@ public class RecipeDetailActivity extends AppCompatActivity implements OnStepCha
                         item.setIcon(R.drawable.ic_unfavorite);
                         toastMessage += getString(R.string.favorite_message);
                     }
-                    Toast.makeText(this, toastMessage, Toast.LENGTH_LONG).show();
                     isFavorite = !isFavorite;
+                    Toast.makeText(this, toastMessage, Toast.LENGTH_LONG).show();
                     break;
                 }
             case android.R.id.home:
@@ -88,6 +91,10 @@ public class RecipeDetailActivity extends AppCompatActivity implements OnStepCha
         return true;
     }
 
+    /*
+     * Note: Up - Back buttons was removing fragment transactions instead of popping the last activity in the app
+     * so I had to force both actions to back in activity
+     */
     @Override
     public void onBackPressed() {
         int fragments = getSupportFragmentManager().getBackStackEntryCount();

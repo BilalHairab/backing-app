@@ -1,6 +1,5 @@
 package com.bilal.backing.adapters;
 
-import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
@@ -8,8 +7,7 @@ import android.widget.RemoteViews;
 import android.widget.RemoteViewsService;
 
 import com.bilal.backing.R;
-import com.bilal.backing.Utils;
-import com.bilal.backing.activities.RecipeDetailActivity;
+import com.bilal.backing.utils.Utils;
 import com.bilal.backing.data.SharedPreferenceUtils;
 import com.bilal.backing.models.Ingredient;
 import com.bilal.backing.models.Recipe;

@@ -6,12 +6,12 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 import com.bilal.backing.R;
-import com.bilal.backing.Utils;
+import com.bilal.backing.utils.Utils;
 import com.bilal.backing.models.Recipe;
 import com.bilal.backing.widget.RecipeWidgetProvider;
 import com.google.gson.Gson;
 
-import static com.bilal.backing.Utils.FAVORITE_RECIPE;
+import static com.bilal.backing.utils.Utils.FAVORITE_RECIPE;
 
 public class SharedPreferenceUtils {
 

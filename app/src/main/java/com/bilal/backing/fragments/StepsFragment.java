@@ -17,7 +17,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 
 import com.bilal.backing.R;
-import com.bilal.backing.Utils;
+import com.bilal.backing.utils.Utils;
 import com.bilal.backing.activities.StepDetailActivity;
 import com.bilal.backing.adapters.StepsAdapter;
 import com.bilal.backing.interfaces.OnStepChanged;
@@ -90,12 +90,11 @@ public class StepsFragment extends Fragment implements OnStepSelected {
         mQuickCustomPopup = new SimpleCustomPop(context, mRecipe.getIngredients());
         if (savedInstanceState != null && savedInstanceState.getBoolean(LIST_STATE) && !mQuickCustomPopup.isShowing())
             showIngredientsList();
-
         linearLayoutManager = new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false);
         ButterKnife.bind(this, view);
         if (mRecipe != null) {
             adapt();
-        }
+        } else getActivity().finish();
         btnIngredients.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

@@ -6,7 +6,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 
 import com.bilal.backing.R;
-import com.bilal.backing.Utils;
+import com.bilal.backing.utils.Utils;
 import com.bilal.backing.fragments.StepDetailFragment;
 import com.bilal.backing.interfaces.OnStepChanged;
 import com.bilal.backing.models.Recipe;
