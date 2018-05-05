@@ -3,6 +3,7 @@ package com.bilal.backing.adapters;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -52,7 +53,7 @@ public class RecipesAdapter extends RecyclerView.Adapter<RecipesAdapter.RecipeHo
     public void onBindViewHolder(@NonNull final RecipeHolder holder, final int position) {
         holder.tvName.setText(mRecipes.get(holder.getAdapterPosition()).getName());
         String path = mRecipes.get(holder.getAdapterPosition()).getImage();
-        if (!path.trim().contentEquals(""))
+        if (!TextUtils.isEmpty(path))
             Picasso.get().load(path).into(holder.imStep);
         holder.tvServed.setText(String.valueOf(mRecipes.get(holder.getAdapterPosition()).getServings()));
         holder.item.setOnClickListener(new View.OnClickListener() {

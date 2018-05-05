@@ -2,6 +2,7 @@ package com.bilal.backing.activities;
 
 import android.os.Bundle;
 import android.support.annotation.VisibleForTesting;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
@@ -9,7 +10,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.widget.Toast;
+import android.widget.LinearLayout;
 
 import com.bilal.backing.R;
 import com.bilal.backing.data.SharedPreferenceUtils;
@@ -20,6 +21,9 @@ import com.bilal.backing.models.Recipe;
 import com.bilal.backing.models.Step;
 import com.bilal.backing.utils.Utils;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 public class RecipeDetailActivity extends AppCompatActivity implements OnStepChanged {
     @VisibleForTesting
     public Recipe mRecipe;
@@ -29,10 +33,14 @@ public class RecipeDetailActivity extends AppCompatActivity implements OnStepCha
     @VisibleForTesting
     public boolean isFavorite = false;
 
+    @BindView(R.id.layout_recipe)
+    LinearLayout linearLayout;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_recipe_detail);
+        ButterKnife.bind(this);
         fragmentManager = getSupportFragmentManager();
         if (findViewById(R.id.fr_step_detail) != null)
             deviceIsTablet = true;
@@ -70,18 +78,20 @@ public class RecipeDetailActivity extends AppCompatActivity implements OnStepCha
         switch (item.getItemId()) {
             case R.id.ic_favorite:
                 if (mRecipe != null) {
-                    String toastMessage = mRecipe.getName() + " ";
+                    String snackMessage = mRecipe.getName() + " ";
                     if (isFavorite) {
                         SharedPreferenceUtils.removeFavoriteRecipe(this);
                         item.setIcon(R.drawable.ic_favorite);
-                        toastMessage += getString(R.string.un_favorite_message);
+                        snackMessage += getString(R.string.un_favorite_message);
                     } else {
                         SharedPreferenceUtils.setFavoriteRecipe(this, mRecipe);
                         item.setIcon(R.drawable.ic_unfavorite);
-                        toastMessage += getString(R.string.favorite_message);
+                        snackMessage += getString(R.string.favorite_message);
                     }
                     isFavorite = !isFavorite;
-                    Toast.makeText(this, toastMessage, Toast.LENGTH_LONG).show();
+                    Snackbar snackbar = Snackbar.make(linearLayout, snackMessage, Snackbar.LENGTH_LONG);
+                    snackbar.show();
+//                    Toast.makeText(this, toastMessage, Toast.LENGTH_LONG).show();
                     break;
                 }
             case android.R.id.home:

@@ -6,19 +6,20 @@ import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
+import android.support.design.widget.Snackbar;
 import android.support.test.espresso.IdlingResource;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
+import android.widget.RelativeLayout;
 
 import com.bilal.backing.R;
-import com.bilal.backing.utils.Utils;
 import com.bilal.backing.adapters.RecipesAdapter;
 import com.bilal.backing.idling.MainActivityIdlingResource;
 import com.bilal.backing.interfaces.OnRecipeSelected;
 import com.bilal.backing.interfaces.RecipesService;
 import com.bilal.backing.models.Recipe;
+import com.bilal.backing.utils.Utils;
 import com.bilal.backing.views.MyRecyclerItemDecoration;
 
 import java.util.ArrayList;
@@ -35,7 +36,8 @@ public class MainActivity extends AppCompatActivity implements OnRecipeSelected 
 
     @BindView(R.id.rv_recipes)
     RecyclerView recyclerView;
-
+    @BindView(R.id.layout_main)
+    RelativeLayout relativeLayout;
     public ArrayList<Recipe> recipes;
     LinearLayoutManager linearLayoutManager;
     static final String STEPS_STATE = "steps_state";
@@ -69,7 +71,8 @@ public class MainActivity extends AppCompatActivity implements OnRecipeSelected 
 
                 @Override
                 public void onFailure(@NonNull Call<ArrayList<Recipe>> call, @NonNull Throwable t) {
-                    Log.e("bilal_recipes", t.getMessage());
+                    Snackbar snackbar = Snackbar.make(relativeLayout, t.getMessage(), Snackbar.LENGTH_LONG);
+                    snackbar.show();
                 }
             });
         }

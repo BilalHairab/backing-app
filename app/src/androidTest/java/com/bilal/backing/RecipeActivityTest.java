@@ -21,11 +21,10 @@ import java.util.List;
 import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.action.ViewActions.click;
 import static android.support.test.espresso.assertion.ViewAssertions.matches;
-import static android.support.test.espresso.matcher.RootMatchers.withDecorView;
 import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
 import static android.support.test.espresso.matcher.ViewMatchers.withText;
-import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.AllOf.allOf;
 import static org.hamcrest.core.IsNot.not;
 
 @RunWith(AndroidJUnit4.class)
@@ -54,23 +53,27 @@ public class RecipeActivityTest {
         onView(withId(R.id.ic_favorite))
                 .perform(click());
 
-        String toastMessage = "";
+        String snackMessage = "";
 
         if (recipe != null) {
-            toastMessage = recipe.getName() + " ";
+            snackMessage = recipe.getName() + " ";
             if (!activity.isFavorite) {
-                toastMessage += activity.getString(R.string.un_favorite_message);
+                snackMessage += activity.getString(R.string.un_favorite_message);
             } else {
-                toastMessage += activity.getString(R.string.favorite_message);
+                snackMessage += activity.getString(R.string.favorite_message);
             }
-            onView(withText(toastMessage)).
-                    inRoot(withDecorView(not(is(activity.getWindow().getDecorView())))).
-                    check(matches(isDisplayed()));
+            onView(allOf(withId(android.support.design.R.id.snackbar_text), withText(snackMessage)))
+                    .check(matches(isDisplayed()));
+//            onView(withText(toastMessage)).
+//                    inRoot(withDecorView(not(is(activity.getWindow().getDecorView())))).
+//                    check(matches(isDisplayed()));
 
         } else {
-            onView(withText(toastMessage)).
-                    inRoot(withDecorView(not(is(activity.getWindow().getDecorView())))).
-                    check(matches(not(isDisplayed())));
+            onView(allOf(withId(android.support.design.R.id.snackbar_text), withText(snackMessage)))
+                    .check(matches(not(isDisplayed())));
+//            onView(withText(toastMessage)).
+//                    inRoot(withDecorView(not(is(activity.getWindow().getDecorView())))).
+//                    check(matches(not(isDisplayed())));
         }
     }
 

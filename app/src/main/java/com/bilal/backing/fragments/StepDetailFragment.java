@@ -37,6 +37,7 @@ public class StepDetailFragment extends Fragment {
     private static final String ARG_STEP = "step";
     private static final String ARG_LAST_STEP = "last";
     //    private static final String ARG_STEP_CHANGED = "changed";
+    private static final String ARG_PLAY_READY = "ready";
     private static final String ARG_CURRENT_POSITION = "position";
 
     private OnStepChanged onStepChanged;
@@ -80,11 +81,13 @@ public class StepDetailFragment extends Fragment {
         if (savedInstanceState != null && savedInstanceState.containsKey(ARG_STEP)) {
             step = savedInstanceState.getParcelable(ARG_STEP);
             playbackPosition = savedInstanceState.getLong(ARG_CURRENT_POSITION);
+            playWhenReady = savedInstanceState.getBoolean(ARG_PLAY_READY);
             isLastStep = savedInstanceState.getBoolean(ARG_LAST_STEP);
         } else if (getArguments() != null) {
             step = getArguments().getParcelable(ARG_STEP);
             isLastStep = getArguments().getBoolean(ARG_LAST_STEP);
         }
+        setRetainInstance(true);
     }
 
     @Override
@@ -129,8 +132,10 @@ public class StepDetailFragment extends Fragment {
         if (step != null) {
             outState.putParcelable(ARG_STEP, step);
             outState.putBoolean(ARG_LAST_STEP, isLastStep);
-            if (player != null)
+            if (player != null) {
                 outState.putLong(ARG_CURRENT_POSITION, player.getCurrentPosition());
+                outState.putBoolean(ARG_PLAY_READY, player.getPlayWhenReady());
+            }
         }
     }
 
@@ -159,6 +164,13 @@ public class StepDetailFragment extends Fragment {
             initializePlayer();
         }
         initFullscreenDialog();
+        if (!isTablet) {
+            if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                openFullscreenDialog();
+            } else if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+                closeFullscreenDialog();
+            }
+        }
     }
 
     private void initializePlayer() {
@@ -171,7 +183,7 @@ public class StepDetailFragment extends Fragment {
         player.seekTo(currentWindow, playbackPosition);
         Uri uri = Uri.parse(step.getVideoURL());
         MediaSource mediaSource = buildMediaSource(uri);
-        player.prepare(mediaSource, true, false);
+        player.prepare(mediaSource, true, true);
     }
 
     private MediaSource buildMediaSource(Uri uri) {
@@ -205,29 +217,6 @@ public class StepDetailFragment extends Fragment {
             releasePlayer();
         }
     }
-//
-//    @SuppressLint("InlinedApi")
-//    private void hideSystemUi() {
-//        playerView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE
-//                | View.SYSTEM_UI_FLAG_FULLSCREEN
-//                | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-//                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-//                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-//                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
-//    }
-//
-//    void toggleFullScreenMode(boolean isFullScreen) {
-//        ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) playerView.getLayoutParams();
-//        if (isFullScreen && !isTablet) {
-//            params.width = params.MATCH_PARENT;
-//            params.height = params.MATCH_PARENT;
-//        } else {
-//            params.width = params.MATCH_PARENT;
-//            params.height = 0;
-//        }
-//        playerView.setLayoutParams(params);
-//
-//    }
 
     private void openFullscreenDialog() {
 
@@ -239,23 +228,9 @@ public class StepDetailFragment extends Fragment {
 
 
     private void closeFullscreenDialog() {
-
         ((ViewGroup) playerView.getParent()).removeView(playerView);
         ((FrameLayout) layout.findViewById(R.id.main_media_frame)).addView(playerView);
         mExoPlayerFullscreen = false;
         mFullScreenDialog.dismiss();
-//        mFullScreenIcon.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_fullscreen_expand));
-    }
-
-    @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-        if (!isTablet) {
-            if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-                openFullscreenDialog();
-            } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
-                closeFullscreenDialog();
-            }
-        }
     }
 }
